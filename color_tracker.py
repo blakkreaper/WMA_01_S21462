@@ -16,12 +16,12 @@ class ColorTracker:
     Class that will handle color tracking.
     """
 
-    def __init__(self, video_path: str, tracked_color: None | tuple[int,int,int]= None) -> None:
+    def __init__(self, video_path: str) -> None:
         self._video = cv2.VideoCapture(video_path)
         if not self._video.isOpened():
             raise ValueError(f'Unable to open video at path {video_path}')
         self._frame: None | np.ndarray = None
-        self._tracked_colors = tracked_color
+        self._tracked_colors = []
         self._processed_frame: None | np.ndarray = None
         self._processing_type: ProcessingType = ProcessingType.RAW
 
@@ -29,8 +29,18 @@ class ColorTracker:
         self._processing_type = p_type
 
     def set_reference_color_by_position(self, x: int, y: int) -> None:
-        hsv_frame: np.ndarray = cv2.cvtColor(self._frame, cv2.COLOR_RGB2HSV)
-        self._tracked_color = hsv_frame[y, x, :]
+        """
+        Function that gets the color in RGB from the position on video and append it to list of
+        tracked colors. If the list is overloaded it is cleared.
+        :param x: int - X color coordinate
+        :param y: int - Y color coordinate
+        :return: None
+        """
+        if len(self._tracked_colors) < 3:  # Limit to 3 tracked colors
+            hsv_frame = cv2.cvtColor(self._frame, cv2.COLOR_BGR2HSV)
+            self._tracked_colors.append((hsv_frame[y, x, 0], hsv_frame[y, x, 1], hsv_frame[y, x, 2]))
+        else:
+            self._tracked_colors.clear()
 
     def update_frame(self) -> bool:
         """
@@ -42,32 +52,25 @@ class ColorTracker:
             self._process_frame()
         return read_successful
 
-    def create_mask(self):
-        if self._tracked_color is not None:
-            # Zakładamy, że _tracked_color jest listą lub krotką trzech elementów HSV
-            hue, saturation, value = self._tracked_color
-            lower_bound = np.array([hue - 10, max(saturation - 40, 100), max(value - 40, 100)])
-            upper_bound = np.array([hue + 10, min(saturation + 40, 255), min(value + 40, 255)])
-            mask = cv2.inRange(cv2.cvtColor(self._frame, cv2.COLOR_BGR2HSV), lower_bound, upper_bound)
-            return mask
-        return None
-
     def _process_frame(self):
-        if self._processing_type == ProcessingType.TRACKER:
-            # Utwórz maskę dla wybranego koloru
-            mask = self.create_mask()
-            if mask is not None:
-                # Znajdź kontury na masce
-                contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                if contours:
-                    # Znajdź największy kontur i narysuj wokół niego prostokąt
-                    largest_contour = max(contours, key=cv2.contourArea)
-                    if cv2.contourArea(largest_contour) > 100:  # Próg wielkości konturu
-                        x, y, w, h = cv2.boundingRect(largest_contour)
-                        cv2.rectangle(self._frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        cv2.putText(self._frame, "Sledzenie aktywne", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
-                                    (0, 255, 0), 2)
-                self._processed_frame = self._frame
+        """
+        Function that processes the frame in a way depending on
+        :return:
+        """
+        for idx, color in enumerate(self._tracked_colors):
+            hue, sat, val = color
+            lower_bound = np.array([hue - 10, sat - 40, val - 40])
+            upper_bound = np.array([hue + 10, sat + 40, val + 40])
+            mask = cv2.inRange(cv2.cvtColor(self._frame, cv2.COLOR_BGR2HSV), lower_bound, upper_bound)
+            # Erozja i dylatacja
+            mask = cv2.erode(mask, None, iterations=5)
+            mask = cv2.dilate(mask, None, iterations=5)
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                if cv2.contourArea(contour) > 100:
+                    x, y, w, h = cv2.boundingRect(contour)
+                    cv2.rectangle(self._frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv2.putText(self._frame, f"Object_{idx+1}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
     def get_frame(self) -> np.ndarray:
         """

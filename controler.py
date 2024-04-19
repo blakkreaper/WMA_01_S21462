@@ -48,15 +48,6 @@ class EventHandler:
 
     def _handle_mouse(self, event, x, y, flags, param) -> None:
         if event == cv2.EVENT_LBUTTONDOWN:
-            # Pobierz ramkę w przestrzeni barw HSV
-            hsv_frame = cv2.cvtColor(self._tracker._frame, cv2.COLOR_BGR2HSV)
-            # Ustaw kolor referencyjny na podstawie pozycji kliknięcia
-            self._tracker._tracked_color = hsv_frame[y, x].tolist()  # Konwertuj wartość na listę
-            print(f"Ustawiono kolor referencyjny: {self._tracker._tracked_color}")
-            # Po kliknięciu myszy, możesz chcieć natychmiastowo zaktualizować maskę i ramkę
-            self._tracker._processing_type = ProcessingType.TRACKER  # Jeżeli masz różne typy przetwarzania
-            mask = self._tracker.create_mask()
-            if mask is not None:
-                self._tracker._processed_frame = mask
+            self._tracker.set_reference_color_by_position(x, y)
 
 

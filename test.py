@@ -57,6 +57,7 @@ class Display:
     def update_display(self, image):
         cv2.imshow(self.window_name, image)
 
+
 class EventHandler:
     def __init__(self, tracker, display, timeout):
         self.tracker = tracker
