@@ -39,7 +39,7 @@ class EventHandler:
         if keycode == ord('q') or keycode == 27:
             return False
 
-        if keycode in EventHandler.PROCESSING_TYPE_KEYMAP.keys():
+        if keycode in EventHandler.PROCESSING_TYPE_KEYMAP:
             self._tracker.set_processing_type(EventHandler.PROCESSING_TYPE_KEYMAP[keycode])
         return True
 
@@ -50,16 +50,17 @@ class EventHandler:
         """
         return self._handle_keys()
 
-    def handle_mouse(self, event: int, x: int, y: int, flags: int, param: Any) -> None:
+    def handle_mouse(self, event: int, x: int, y: int, _flags: int, _param: Any) -> None:
         """
         Handles mouse events, specifically left button clicks to set the reference color
         for tracking based on the mouse's position on the image.
 
-        :param event: int - Integer representing the type of mouse event (e.g., cv2.EVENT_LBUTTONDOWN).
+        :param event: int - Integer representing the type of mouse event
+                            (e.g., cv2.EVENT_LBUTTONDOWN).
         :param x: int - The x-coordinate of the mouse event.
         :param y: int - The y-coordinate of the mouse event.
-        :param flags: int - Special flags passed with the event.
-        :param param: Any - Additional parameter passed through the callback.
+        :param _flags: int - Special flags passed with the event.
+        :param _param: Any - Additional parameter passed through the callback.
         :return: None
         """
         if (event == cv2.EVENT_LBUTTONDOWN and

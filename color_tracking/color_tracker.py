@@ -21,7 +21,11 @@ class ColorTracker:
         if not self._video.isOpened():
             raise ValueError(f'Unable to open video at path {video_path}')
         self._frame: None | np.ndarray[Any, Any] = None
-        self._tracked_colors: list[tuple[np.ndarray[Any, Any], np.ndarray[Any, Any], np.ndarray[Any, Any]]] = []
+        self._tracked_colors: list[tuple[
+            np.ndarray[Any, Any],
+            np.ndarray[Any, Any],
+            np.ndarray[Any, Any]
+        ]] = []
         self._processed_frame: None | np.ndarray[Any, Any] = None
         self._processing_type: ProcessingType = ProcessingType.RAW
 

@@ -10,7 +10,7 @@ import numpy as np
 
 class Display:
     """
-    Display class.
+    Display class responsible for window frames display. .
     """
 
     def __init__(self, window_name: str) -> None:
