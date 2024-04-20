@@ -1,5 +1,6 @@
 """
-Module handling the displaying.
+This an example of object tracking (we are not expecting more than
+one object on the same recording).
 """
 
 import cv2 as cv

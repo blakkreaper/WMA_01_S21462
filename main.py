@@ -1,13 +1,14 @@
 """
-Main function for running the whole app.
+This an example of object tracking (we are not expecting more than
+one object on the same recording).
 """
 
 
 import argparse
 
-from color_tracker import ColorTracker
-from controler import EventHandler
-from display import Display
+from color_tracking.color_tracker import ColorTracker
+from color_tracking.controler import EventHandler
+from color_tracking.display import Display
 
 
 def parse_arguments() -> argparse.Namespace:
