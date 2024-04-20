@@ -2,6 +2,7 @@
 This an example of object tracking (we are not expecting more than
 one object on the same recording).
 """
+from typing import Any
 
 import cv2
 
@@ -49,7 +50,18 @@ class EventHandler:
         """
         return self._handle_keys()
 
-    def handle_mouse(self, event, x, y, flags, param) -> None:
+    def handle_mouse(self, event: int, x: int, y: int, flags: int, param: Any) -> None:
+        """
+        Handles mouse events, specifically left button clicks to set the reference color
+        for tracking based on the mouse's position on the image.
+
+        :param event: int - Integer representing the type of mouse event (e.g., cv2.EVENT_LBUTTONDOWN).
+        :param x: int - The x-coordinate of the mouse event.
+        :param y: int - The y-coordinate of the mouse event.
+        :param flags: int - Special flags passed with the event.
+        :param param: Any - Additional parameter passed through the callback.
+        :return: None
+        """
         if (event == cv2.EVENT_LBUTTONDOWN and
                 self._tracker.get_processing_type() == ProcessingType.TRACKER):
             self._tracker.set_reference_color_by_position(x, y)
